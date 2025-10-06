@@ -6,36 +6,20 @@ const FLOW_API_KEY = '312F5DCD-BEC9-4498-A45F-6E0540LE86CE';
 const FLOW_SECRET = 'b8cdacf8c7603ce55ba820e2785d751cd9eb6c63';
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyj7BU8AbBj3R87GATMQ-d0jKia_OU7H9fThgXr9-GLv8A8GygwNQ8eR3CapKjOg5tT/exec';
 
-const httpsAgent = new https.Agent({
-  rejectUnauthorized: false
-});
-
 exports.handler = async (event) => {
   console.log('Webhook llamado');
-  console.log('Método:', event.httpMethod);
-  console.log('Body:', event.body);
   
   let token = null;
-  
-  // Buscar token en POST body (lo que Flow envía)
   if (event.httpMethod === 'POST' && event.body) {
     const body = querystring.parse(event.body);
     token = body.token;
-    console.log('Token desde POST body:', token);
-  }
-  
-  // Fallback: buscar en query params
-  if (!token && event.queryStringParameters?.token) {
-    token = event.queryStringParameters.token;
-    console.log('Token desde query params:', token);
   }
   
   if (!token) {
-    console.log('No se recibió token');
     return { statusCode: 200, body: 'OK' };
   }
   
-  console.log('Procesando token:', token);
+  console.log('Token:', token);
   processPayment(token).catch(err => console.error('Error:', err));
   
   return { statusCode: 200, body: 'OK' };
@@ -43,40 +27,56 @@ exports.handler = async (event) => {
 
 async function processPayment(token) {
   try {
-    const fetch = (await import('node-fetch')).default;
-    
-    const params = {
-      apiKey: FLOW_API_KEY,
-      token: token
-    };
-    
+    const params = { apiKey: FLOW_API_KEY, token: token };
     const sortedKeys = Object.keys(params).sort();
     let signString = '';
-    sortedKeys.forEach(key => {
-      signString += key + params[key];
-    });
+    sortedKeys.forEach(key => { signString += key + params[key]; });
     
     const signature = crypto.createHmac('sha256', FLOW_SECRET).update(signString).digest('hex');
+    params.s = signature;
     
-    console.log('Consultando Flow...');
+    const postData = querystring.stringify(params);
     
-    const postParams = { ...params, s: signature };
-    const flowParams = new URLSearchParams(postParams);
-    
-    const flowResponse = await fetch('https://sandbox.flow.cl/api/payment/getStatus', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: flowParams.toString(),
-      agent: httpsAgent
+    const flowData = await new Promise((resolve, reject) => {
+      const options = {
+        hostname: 'sandbox.flow.cl',
+        path: '/api/payment/getStatus',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Length': postData.length
+        },
+        rejectUnauthorized: false
+      };
+      
+      console.log('Llamando Flow API...');
+      
+      const req = https.request(options, (res) => {
+        let data = '';
+        res.on('data', (chunk) => { data += chunk; });
+        res.on('end', () => {
+          console.log('Flow respondió:', data);
+          try {
+            resolve(JSON.parse(data));
+          } catch (e) {
+            reject(new Error('JSON inválido: ' + data));
+          }
+        });
+      });
+      
+      req.on('error', (e) => {
+        console.error('Error de conexión:', e.message);
+        reject(e);
+      });
+      
+      req.write(postData);
+      req.end();
     });
     
-    const flowData = await flowResponse.json();
-    console.log('Flow respondió:', flowData);
-    
     if (flowData.status === 2) {
-      console.log('Pago aprobado, actualizando...');
+      console.log('Pago aprobado');
       
-      const appsScriptParams = new URLSearchParams({
+      const appsParams = querystring.stringify({
         action: 'confirmarPagoFlowFromMake',
         token: token,
         flowOrder: flowData.flowOrder,
@@ -85,15 +85,27 @@ async function processPayment(token) {
         status: flowData.status
       });
       
-      await fetch(APPS_SCRIPT_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: appsScriptParams.toString()
+      await new Promise((resolve, reject) => {
+        const req = https.request(APPS_SCRIPT_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Content-Length': appsParams.length
+          }
+        }, (res) => {
+          let data = '';
+          res.on('data', (chunk) => { data += chunk; });
+          res.on('end', () => resolve(data));
+        });
+        
+        req.on('error', reject);
+        req.write(appsParams);
+        req.end();
       });
       
-      console.log('✓ Completado');
+      console.log('Actualización completada');
     }
   } catch (error) {
-    console.error('Error:', error.message);
+    console.error('Error completo:', error.message);
   }
 }
