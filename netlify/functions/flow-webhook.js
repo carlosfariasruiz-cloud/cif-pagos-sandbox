@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const https = require('https');
+const querystring = require('querystring');
 
 const FLOW_API_KEY = '312F5DCD-BEC9-4498-A45F-6E0540LE86CE';
 const FLOW_SECRET = 'b8cdacf8c7603ce55ba820e2785d751cd9eb6c63';
@@ -11,14 +12,30 @@ const httpsAgent = new https.Agent({
 
 exports.handler = async (event) => {
   console.log('Webhook llamado');
+  console.log('Método:', event.httpMethod);
+  console.log('Body:', event.body);
   
-  const token = event.queryStringParameters?.token;
+  let token = null;
+  
+  // Buscar token en POST body (lo que Flow envía)
+  if (event.httpMethod === 'POST' && event.body) {
+    const body = querystring.parse(event.body);
+    token = body.token;
+    console.log('Token desde POST body:', token);
+  }
+  
+  // Fallback: buscar en query params
+  if (!token && event.queryStringParameters?.token) {
+    token = event.queryStringParameters.token;
+    console.log('Token desde query params:', token);
+  }
   
   if (!token) {
+    console.log('No se recibió token');
     return { statusCode: 200, body: 'OK' };
   }
   
-  console.log('Token:', token);
+  console.log('Procesando token:', token);
   processPayment(token).catch(err => console.error('Error:', err));
   
   return { statusCode: 200, body: 'OK' };
@@ -41,42 +58,23 @@ async function processPayment(token) {
     
     const signature = crypto.createHmac('sha256', FLOW_SECRET).update(signString).digest('hex');
     
-    let flowData = null;
+    console.log('Consultando Flow...');
     
-    // Intentar POST primero
-    try {
-      console.log('Intentando POST...');
-      const postParams = { ...params, s: signature };
-      const flowParams = new URLSearchParams(postParams);
-      
-      const flowResponse = await fetch('https://sandbox.flow.cl/api/payment/getStatus', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: flowParams.toString(),
-        agent: httpsAgent
-      });
-      
-      flowData = await flowResponse.json();
-      console.log('POST exitoso');
-    } catch (postError) {
-      console.log('POST falló, intentando GET...');
-      
-      // Fallback a GET
-      const url = `https://sandbox.flow.cl/api/payment/getStatus?apiKey=${FLOW_API_KEY}&token=${token}&s=${signature}`;
-      
-      const flowResponse = await fetch(url, {
-        method: 'GET',
-        agent: httpsAgent
-      });
-      
-      flowData = await flowResponse.json();
-      console.log('GET exitoso');
-    }
+    const postParams = { ...params, s: signature };
+    const flowParams = new URLSearchParams(postParams);
     
-    console.log('Flow status:', flowData.status);
+    const flowResponse = await fetch('https://sandbox.flow.cl/api/payment/getStatus', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: flowParams.toString(),
+      agent: httpsAgent
+    });
+    
+    const flowData = await flowResponse.json();
+    console.log('Flow respondió:', flowData);
     
     if (flowData.status === 2) {
-      console.log('Pago aprobado');
+      console.log('Pago aprobado, actualizando...');
       
       const appsScriptParams = new URLSearchParams({
         action: 'confirmarPagoFlowFromMake',
@@ -93,9 +91,9 @@ async function processPayment(token) {
         body: appsScriptParams.toString()
       });
       
-      console.log('Apps Script actualizado');
+      console.log('✓ Completado');
     }
   } catch (error) {
-    console.error('Error completo:', error.message);
+    console.error('Error:', error.message);
   }
 }
