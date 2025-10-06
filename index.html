@@ -1,0 +1,2098 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Pagos - Copa Internacional de Fermentados 2025</title>
+    
+    <script src="https://www.paypal.com/sdk/js?client-id=AeWdKNBP5z0tZWUyZwkK9_ohhMBKKgw5PRkCEGVoCMQGmGhVRAlJUzlCo7WU-jvgN6dF-HQiUmXo16J9&currency=USD&components=buttons&enable-funding=card,credit,paylater"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+            min-height: 100vh;
+            padding: 0;
+        }
+        
+        .site-header {
+            background: #000;
+            padding: 15px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .logo {
+            height: 60px;
+            width: auto;
+            transition: height 0.3s;
+        }
+        
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            padding: 10px;
+            z-index: 1002;
+            position: relative;
+            background: transparent;
+            border: none;
+        }
+        
+        .hamburger span {
+            width: 25px;
+            height: 3px;
+            background: #fff;
+            margin: 3px 0;
+            transition: 0.3s;
+            border-radius: 3px;
+        }
+        
+        .hamburger.active span:nth-child(1) {
+            transform: rotate(-45deg) translate(-5px, 6px);
+        }
+        
+        .hamburger.active span:nth-child(2) {
+            opacity: 0;
+        }
+        
+        .hamburger.active span:nth-child(3) {
+            transform: rotate(45deg) translate(-5px, -6px);
+        }
+        
+        .main-nav {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+        
+        .nav-item {
+            position: relative;
+            color: #fff;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            padding: 10px 0;
+            cursor: pointer;
+            transition: color 0.3s;
+            white-space: nowrap;
+        }
+        
+        .nav-item:hover {
+            color: #ccc;
+        }
+        
+        .nav-item.has-dropdown::after {
+            content: '▼';
+            font-size: 10px;
+            margin-left: 6px;
+            transition: transform 0.3s;
+        }
+        
+        .nav-item.has-dropdown.active::after {
+            transform: rotate(180deg);
+        }
+        
+        .dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: #1a1a1a;
+            min-width: 220px;
+            padding: 10px 0;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            margin-top: 10px;
+            z-index: 100;
+        }
+        
+        .dropdown.show {
+            display: block;
+        }
+        
+        .dropdown a {
+            display: block;
+            color: #fff;
+            text-decoration: none;
+            padding: 12px 20px;
+            font-size: 13px;
+            transition: background 0.2s;
+        }
+        
+        .dropdown a:hover {
+            background: #2a2a2a;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2C5F4A 0%, #4A8B6A 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px 15px 0 0;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+        }
+        
+        .payment-section {
+            background: white;
+            border-radius: 0 0 15px 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .section-title {
+            color: #2C5F4A;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #4A8B6A;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #4A8B6A;
+            box-shadow: 0 0 0 3px rgba(74, 139, 106, 0.1);
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #4A8B6A 0%, #2C5F4A 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(44, 95, 74, 0.3);
+        }
+        
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border-color: #28a745;
+        }
+        
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border-color: #dc3545;
+        }
+        
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-color: #17a2b8;
+        }
+        
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border-color: #ffc107;
+        }
+        
+        .muestras-container {
+            padding: 0;
+        }
+        
+        .categoria-header {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #2C5F4A;
+            padding: 6px 0 4px 0;
+            margin-top: 10px;
+            border-bottom: 1px solid #d0d0d0;
+        }
+        
+        .categoria-header:first-child {
+            margin-top: 0;
+        }
+        
+        .muestra-item {
+            display: flex;
+            align-items: center;
+            padding: 6px 0;
+            transition: all 0.2s;
+            border-bottom: 1px solid #f8f8f8;
+        }
+        
+        .muestra-item:hover {
+            background: #f8f9fa;
+            padding-left: 5px;
+        }
+        
+        .muestra-checkbox {
+            width: 18px;
+            height: 18px;
+            margin-right: 12px;
+            cursor: pointer;
+        }
+        
+        .muestra-info {
+            flex: 1;
+        }
+        
+        .muestra-nombre {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 3px;
+        }
+        
+        .muestra-id {
+            font-size: 0.8rem;
+            color: #666;
+            font-family: monospace;
+        }
+        
+        .muestra-tipo {
+            display: inline-block;
+            padding: 2px 6px;
+            background: #e8f5e9;
+            color: #2e7d32;
+            border-radius: 3px;
+            font-size: 0.75rem;
+            margin-left: auto;
+        }
+        
+        .resumen-pago {
+            background: #fafafa;
+            border: 1px solid #d0d0d0;
+            border-radius: 8px;
+            padding: 0;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+        
+        .resumen-titulo {
+            font-size: 1.1rem;
+            color: #2C5F4A;
+            font-weight: 700;
+            padding: 15px 20px;
+            background: #f0f0f0;
+            border-bottom: 1px solid #d0d0d0;
+            margin: 0;
+        }
+        
+        .resumen-items {
+            padding: 15px 20px;
+        }
+        
+        .resumen-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #e8e8e8;
+            font-size: 0.95rem;
+            color: #333;
+        }
+        
+        .resumen-item:last-child {
+            border-bottom: none;
+        }
+        
+        .resumen-item-tipo {
+            font-weight: 500;
+        }
+        
+        .resumen-item-precio {
+            font-weight: 700;
+            color: #2C5F4A;
+        }
+        
+        .resumen-total {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #2C5F4A;
+            padding: 15px 20px;
+            background: #f0f0f0;
+            border-top: 2px solid #2C5F4A;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 0;
+        }
+        
+        #paypal-button-container {
+            margin-top: 25px;
+            background: #ffffff;
+            border-radius: 8px;
+            border: 1px solid #d0d0d0;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .paypal-header {
+            background: #f0f0f0;
+            padding: 15px 20px;
+            border-bottom: 1px solid #d0d0d0;
+        }
+        
+        .paypal-header h3 {
+            margin: 0;
+            color: #2C5F4A;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        #paypal-buttons-wrapper {
+            padding: 20px;
+        }
+        
+        .paypal-footer {
+            text-align: center;
+            padding: 15px;
+            background: #fafafa;
+            border-top: 1px solid #e8e8e8;
+        }
+        
+        .paypal-footer img {
+            height: 24px;
+            opacity: 0.7;
+            margin-bottom: 8px;
+        }
+        
+        .paypal-footer p {
+            margin: 0;
+            font-size: 0.8rem;
+            color: #999;
+        }
+
+        .payment-methods-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 25px;
+        }
+
+        #paypal-button-container,
+        #flow-button-container {
+            background: #ffffff;
+            border-radius: 8px;
+            border: 1px solid #d0d0d0;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .paypal-header,
+        .flow-header {
+            background: #f0f0f0;
+            padding: 15px 20px;
+            border-bottom: 1px solid #d0d0d0;
+        }
+        
+        .paypal-header h3,
+        .flow-header h3 {
+            margin: 0;
+            color: #2C5F4A;
+            font-size: 1rem;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        .paypal-header .payment-subtitle,
+        .flow-header .payment-subtitle {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 5px;
+            font-weight: 400;
+        }
+        
+        #flow-buttons-wrapper {
+            padding: 20px;
+        }
+        
+        .flow-button {
+            width: 100%;
+            padding: 15px 30px;
+            background: white;
+            color: #333;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .flow-button img {
+            height: 30px;
+            width: auto;
+        }
+        
+        .flow-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-color: #00A9E0;
+        }
+        
+        .flow-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .flow-footer {
+            text-align: center;
+            padding: 15px;
+            background: #fafafa;
+            border-top: 1px solid #e8e8e8;
+        }
+        
+        .flow-footer p {
+            margin: 0;
+            font-size: 0.8rem;
+            color: #999;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4A8B6A;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        #codigo-section {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f0f8ff;
+            border-radius: 10px;
+            border: 2px dashed #4A8B6A;
+        }
+        
+        #codigo-section input {
+            text-align: center;
+            font-size: 1.8rem;
+            letter-spacing: 8px;
+            font-weight: bold;
+            color: #2C5F4A;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+        }
+        
+        .modal-success .modal-content {
+            border: 3px solid #28a745;
+        }
+        
+        .modal-error .modal-content {
+            border: 3px solid #dc3545;
+        }
+        
+        .header-desktop {
+            display: inline;
+        }
+        
+        .header-mobile {
+            display: none;
+        }
+        
+        @media (max-width: 992px) {
+            .main-nav {
+                gap: 20px;
+            }
+            
+            .nav-item {
+                font-size: 13px;
+            }
+            
+            .logo {
+                height: 50px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .site-header {
+                padding: 10px 15px;
+            }
+            
+            .logo {
+                height: 45px;
+            }
+            
+            .hamburger {
+                display: flex;
+                position: fixed;
+                top: 15px;
+                right: 15px;
+                z-index: 1002;
+            }
+            
+            .main-nav {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                width: 280px;
+                height: 100vh;
+                background: #000;
+                flex-direction: column;
+                gap: 0;
+                padding: 80px 0 30px;
+                transition: right 0.3s ease-in-out;
+                overflow-y: auto;
+                box-shadow: -5px 0 15px rgba(0,0,0,0.5);
+                align-items: flex-start;
+                z-index: 1001;
+            }
+            
+            .main-nav.active {
+                right: 0;
+            }
+            
+            .nav-item {
+                width: 100%;
+                padding: 15px 25px;
+                border-bottom: 1px solid #222;
+                font-size: 15px;
+            }
+            
+            .nav-item.has-dropdown::after {
+                position: absolute;
+                right: 25px;
+            }
+            
+            .dropdown {
+                position: static;
+                width: 100%;
+                margin-top: 0;
+                border-radius: 0;
+                background: #111;
+                box-shadow: none;
+                padding: 0;
+            }
+            
+            .dropdown a {
+                padding: 12px 40px;
+                border-bottom: 1px solid #222;
+                font-size: 14px;
+            }
+            
+            .dropdown a:last-child {
+                border-bottom: none;
+            }
+            
+            .nav-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.7);
+                z-index: 999;
+                pointer-events: auto;
+            }
+            
+            .nav-overlay.active {
+                display: block;
+            }
+            
+            .header h1 {
+                font-size: 1.6rem;
+            }
+            
+            .header p {
+                font-size: 0.95rem;
+            }
+            
+            .section-title {
+                font-size: 1.4rem;
+            }
+            
+            .muestra-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            
+            .muestra-tipo {
+                margin-left: 0;
+                margin-top: 5px;
+            }
+            
+            .resumen-total {
+                font-size: 1.1rem;
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+            }
+            
+            .btn {
+                width: 100%;
+                padding: 15px 20px;
+                font-size: 1rem;
+            }
+
+            .payment-methods-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 10px;
+            }
+            
+            .payment-section > div:last-child {
+                padding: 20px !important;
+            }
+            
+            .modal-content {
+                padding: 30px 20px;
+            }
+            
+            .header-desktop {
+                display: none;
+            }
+            
+            .header-mobile {
+                display: inline;
+            }
+            
+            table {
+                font-size: 0.8rem;
+            }
+            
+            table th, table td {
+                padding: 6px 3px !important;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .logo {
+                height: 40px;
+            }
+            
+            .header h1 {
+                font-size: 1.3rem;
+            }
+            
+            .section-title {
+                font-size: 1.2rem;
+            }
+            
+            .muestra-nombre {
+                font-size: 0.95rem;
+            }
+            
+            .main-nav {
+                width: 100%;
+            }
+            
+            table th, table td {
+                padding: 5px 2px !important;
+                font-size: 0.7rem;
+            }
+            
+            #codigo-section input {
+                font-size: 1.4rem;
+                letter-spacing: 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Agregar justo después de <body> -->
+<div style="background: #ff9800; color: white; text-align: center; padding: 10px; font-weight: bold;">
+    🧪 MODO SANDBOX - PRUEBAS - NO SON PAGOS REALES
+</div>
+    <header class="site-header">
+        <div class="nav-overlay" onclick="closeMobileMenu()"></div>
+        <div class="header-container">
+            <a href="https://copainternacionaldefermentados.com/inicio">
+                <img src="https://img1.wsimg.com/isteam/ip/f3d32df7-8a2f-48bf-ab0b-c13554610131/CIF%202025%20Blanco%20Transparente%20PNG.png/:/rs=w:1440,h:1440" alt="Copa Internacional de Fermentados" class="logo">
+            </a>
+            
+            <div class="hamburger" onclick="toggleMobileMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+                        
+            <nav class="main-nav" id="mainNav">
+                <a href="https://copainternacionaldefermentados.com/inicio" class="nav-item">INICIO</a>
+                
+                <div class="nav-item has-dropdown" onclick="toggleDropdown(event,'dropdown-competencia')">
+                    COMPETENCIA
+                    <div id="dropdown-competencia" class="dropdown">
+                        <a href="https://copainternacionaldefermentados.com/cronograma">CRONOGRAMA</a>
+                        <a href="https://copainternacionaldefermentados.com/evento">EVENTO</a>
+                        <a href="https://copainternacionaldefermentados.com/bases-1">BASES</a>
+                        <a href="https://copainternacionaldefermentados.com/reglamento-oficial">REGLAMENTO OFICIAL</a>
+                        <a href="https://copainternacionaldefermentados.com/envío-muestras">ENVÍO MUESTRAS</a>
+                        <a href="https://copainternacionaldefermentados.com/voluntarios">VOLUNTARIOS</a>
+                    </div>
+                </div>
+                
+                <div class="nav-item has-dropdown" onclick="toggleDropdown(event,'dropdown-inscripciones')">
+                    INSCRIPCIONES
+                    <div id="dropdown-inscripciones" class="dropdown">
+                        <a href="https://copainternacionaldefermentados.com/bebidas-participantes">BEBIDAS PARTICIPANTES</a>
+                        <a href="https://copainternacionaldefermentados.com/cervezas-profesionales">CERVEZAS PROFESIONALES</a>
+                        <a href="https://copainternacionaldefermentados.com/cervezas-homebrewers">CERVEZAS HOMEBREWERS</a>
+                        <a href="https://copainternacionaldefermentados.com/sidra">SIDRA</a>
+                        <a href="https://copainternacionaldefermentados.com/hidromiel">HIDROMIEL</a>
+                        <a href="https://copainternacionaldefermentados.com/kombucha">KOMBUCHA</a>
+                        <a href="https://copainternacionaldefermentados.com/vinos">VINOS</a>
+                    </div>
+                </div>
+                
+                <div class="nav-item has-dropdown" onclick="toggleDropdown(event,'dropdown-ediciones')">
+                    EDICIONES Y PAGOS
+                    <div id="dropdown-ediciones" class="dropdown">
+                        <a href="#">SISTEMA DE PAGOS</a>
+                        <a href="https://editor-universal-cif.netlify.app/">EDITOR INSCRIPCIONES</a>
+                    </div>
+                </div>
+                
+                <div class="nav-item has-dropdown" onclick="toggleDropdown(event,'dropdown-nosotros')">
+                    NOSOTROS
+                    <div id="dropdown-nosotros" class="dropdown">
+                        <a href="https://copainternacionaldefermentados.com/quienes-somos">QUIENES SOMOS</a>
+                        <a href="https://copainternacionaldefermentados.com/partners-1">PARTNERS</a>
+                        <a href="https://copainternacionaldefermentados.com/jueces">JUECES</a>
+                        <a href="https://copainternacionaldefermentados.com/historia">HISTORIA</a>
+                    </div>
+                </div>
+                
+                <div class="nav-item has-dropdown" onclick="toggleDropdown(event,'dropdown-mas')">
+                    MÁS
+                    <div id="dropdown-mas" class="dropdown">
+                        <a href="https://copainternacionaldefermentados.com/contacto-1">CONTACTO</a>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div id="welcome-screen" class="payment-section">
+            <div class="header">
+                <h1>Copa Internacional de Fermentados 2025</h1>
+                <p>Sistema de Pagos de Inscripciones</p>
+            </div>
+            
+            <div style="background: white; border-radius: 15px; padding: 30px; margin-top: 30px;">
+                <h2 style="color: #2C5F4A; text-align: center; margin-bottom: 25px;">
+                    Bienvenido al Sistema de Pagos
+                </h2>
+                
+                <div style="background: #e8f5e9; border-radius: 10px; padding: 20px; margin-bottom: 25px;">
+                    <h3 style="color: #2e7d32; margin-top: 0;">Como funciona</h3>
+                    <ol style="color: #555; line-height: 1.8;">
+                        <li><strong>Ingresa tu correo</strong> - El mismo que usaste para inscribir tus muestras</li>
+                        <li><strong>Verifica tu identidad</strong> - Te enviaremos un código de verificación</li>
+                        <li><strong>Selecciona las muestras</strong> - Elige cuáles deseas pagar</li>
+                        <li><strong>Realiza el pago</strong> - Proceso seguro con PayPal o Flow</li>
+                        <li><strong>Recibe confirmación</strong> - Por email con todos los detalles</li>
+                    </ol>
+                </div>
+                
+                <div style="background: #e3f2fd; border-left: 4px solid #2196F3; padding: 20px; margin-bottom: 25px; border-radius: 8px;">
+                    <h3 style="color: #1565C0; margin-top: 0;">Como funciona el sistema de precios</h3>
+                    <ul style="color: #555; line-height: 1.8; margin: 0;">
+                        <li><strong>Precio por volumen total:</strong> El precio se calcula según el TOTAL de muestras inscritas</li>
+                        <li><strong>Solo pagas la diferencia:</strong> Si ya pagaste muestras, solo pagas lo que falta</li>
+                        <li><strong>Descuento automático:</strong> Entre más muestras inscribas, menor es el precio por muestra</li>
+                    </ul>
+                </div>
+                
+                <div style="background: #fff8e8; border-radius: 10px; padding: 20px; margin-bottom: 25px; border: 2px solid #4A8B6A;">
+                    <h3 style="color: #2C5F4A; margin-top: 0; text-align: center; font-size: 1.3rem;">Tabla de Precios 2025 (USD)</h3>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: #2C5F4A; color: white;">
+                                <th style="text-align: center; padding: 10px; font-size: 0.95rem; border-right: 1px solid #4A8B6A;">
+                                    <span class="header-desktop">Muestras</span>
+                                    <span class="header-mobile">Cant.</span>
+                                </th>
+                                <th style="text-align: center; padding: 10px; font-size: 0.95rem; border-right: 1px solid #4A8B6A;">
+                                    <span class="header-desktop">Homebrewer/Casero</span>
+                                    <span class="header-mobile">Home/Casero</span>
+                                </th>
+                                <th style="text-align: center; padding: 10px; font-size: 0.95rem; border-right: 1px solid #4A8B6A;">
+                                    <span class="header-desktop">Productor Nacional</span>
+                                    <span class="header-mobile">Prod. Nac.</span>
+                                </th>
+                                <th style="text-align: center; padding: 10px; font-size: 0.95rem;">
+                                    <span class="header-desktop">Productor Internacional</span>
+                                    <span class="header-mobile">Prod. Int.</span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="background: white;">
+                                <td style="text-align: center; padding: 8px; border: 1px solid #e0e0e0; font-weight: 600;">1</td>
+                                <td style="text-align: center; padding: 8px; border: 1px solid #e0e0e0; font-size: 1rem; font-weight: 700; color: #2C5F4A;">$44</td>
+                                <td style="text-align: center; padding: 8px; border: 1px solid #e0e0e0; font-size: 1rem; font-weight: 700; color: #2C5F4A;">$53</td>
+                                <td style="text-align: center; padding: 8px; border: 1px solid #e0e0e0; font-size: 1rem; font-weight: 700; color: #2C5F4A;">$58</td>
+                            </tr>
+                            <tr style="background: #f8f8f8;">
+                                <td style="text-align: center; padding: 8px; border: 1px solid #e0e0e0; font-weight: 600;">2</td>
+                                <td style="text-align: center; padding: 8px; border: 1px solid #e0e0e0; font-size: 1rem; font-weight: 700; color: #2C5F4A;">$83</td>
+                                <td style="text-align: center; padding: 8px; border: 1px solid #e0e0e0; font-size: 1rem; font-weight: 700; color: #2C5F4A;">$100</td>
+                                <td style="text-align: center; padding: 8px; border: 1px solid #e0e0e0; font-size: 1rem; font-weight: 700; color: #2C5F4A;">$110</td>
+                            </tr>
+                            <tr style="background: white;">
+                                <td style="text-align: center; padding: 8px; border: 1px solid #e0e0e0; font-weight: 600;">3</td>
+                                <td style="text-align: center; padding: 8px; border: 1px solid #e0e0e0; font-size: 1rem; font-weight: 700; color: #2C5F4A;">$119</td>
+                                <td style="text-align: center; padding: 8px; border: 1px solid #e0e0e0; font-size: 1rem; font-weight: 700; color: #2C5F4A;">$143</td>
+                                <td style="text-align: center; padding: 8px; border: 1px solid #e0e0e0; font-size: 1rem; font-weight: 700; color: #2C5F4A;">$157.5</td>
+                            </tr>
+                            <tr style="background: #f8f8f8;">
+                                <td style="text-align: center; padding: 8px; border: 1px solid #e0e0e0; font-weight: 600;">4</td>
+                                <td style="text-align: center; padding: 8px; border: 1px solid #e0e0e0; font-size: 1rem; font-weight: 700; color: #2C5F4A;">$152</td>
+                                <td style="text-align: center; padding: 8px; border: 1px solid #e0e0e0; font-size: 1rem; font-weight: 700; color: #2C5F4A;">$182</td>
+                                <td style="text-align: center; padding: 8px; border: 1px solid #e0e0e0; font-size: 1rem; font-weight: 700; color: #2C5F4A;">$200</td>
+                            </tr>
+                            <tr style="background: white;">
+                                <td style="text-align: center; padding: 8px; border: 1px solid #e0e0e0; font-weight: 600;">5</td>
+                                <td style="text-align: center; padding: 8px; border: 1px solid #e0e0e0; font-size: 1rem; font-weight: 700; color: #2C5F4A;">$180</td>
+                                <td style="text-align: center; padding: 8px; border: 1px solid #e0e0e0; font-size: 1rem; font-weight: 700; color: #2C5F4A;">$216</td>
+                                <td style="text-align: center; padding: 8px; border: 1px solid #e0e0e0; font-size: 1rem; font-weight: 700; color: #2C5F4A;">$237.5</td>
+                            </tr>
+                            <tr style="background: #f8f8f8;">
+                                <td style="text-align: center; padding: 8px; border: 1px solid #e0e0e0; font-weight: 600;">6</td>
+                                <td style="text-align: center; padding: 8px; border: 1px solid #e0e0e0; font-size: 1rem; font-weight: 700; color: #2C5F4A;">$204</td>
+                                <td style="text-align: center; padding: 8px; border: 1px solid #e0e0e0; font-size: 1rem; font-weight: 700; color: #2C5F4A;">$245</td>
+                                <td style="text-align: center; padding: 8px; border: 1px solid #e0e0e0; font-size: 1rem; font-weight: 700; color: #2C5F4A;">$270</td>
+                            </tr>
+                            <tr style="background: white;">
+                                <td style="text-align: center; padding: 8px; border: 1px solid #e0e0e0; font-weight: 600;">7</td>
+                                <td style="text-align: center; padding: 8px; border: 1px solid #e0e0e0; font-size: 1rem; font-weight: 700; color: #2C5F4A;">$225</td>
+                                <td style="text-align: center; padding: 8px; border: 1px solid #e0e0e0; font-size: 1rem; font-weight: 700; color: #2C5F4A;">$270</td>
+                                <td style="text-align: center; padding: 8px; border: 1px solid #e0e0e0; font-size: 1rem; font-weight: 700; color: #2C5F4A;">$297.5</td>
+                            </tr>
+                            <tr style="background: #f8f8f8;">
+                                <td style="text-align: center; padding: 8px; border: 1px solid #e0e0e0; font-weight: 600;">8</td>
+                                <td style="text-align: center; padding: 8px; border: 1px solid #e0e0e0; font-size: 1rem; font-weight: 700; color: #2C5F4A;">$243</td>
+                                <td style="text-align: center; padding: 8px; border: 1px solid #e0e0e0; font-size: 1rem; font-weight: 700; color: #2C5F4A;">$291</td>
+                                <td style="text-align: center; padding: 8px; border: 1px solid #e0e0e0; font-size: 1rem; font-weight: 700; color: #2C5F4A;">$320</td>
+                            </tr>
+                            <tr style="background: white;">
+                                <td style="text-align: center; padding: 8px; border: 1px solid #e0e0e0; font-weight: 600;">9</td>
+                                <td style="text-align: center; padding: 8px; border: 1px solid #e0e0e0; font-size: 1rem; font-weight: 700; color: #2C5F4A;">$256</td>
+                                <td style="text-align: center; padding: 8px; border: 1px solid #e0e0e0; font-size: 1rem; font-weight: 700; color: #2C5F4A;">$307</td>
+                                <td style="text-align: center; padding: 8px; border: 1px solid #e0e0e0; font-size: 1rem; font-weight: 700; color: #2C5F4A;">$337.5</td>
+                            </tr>
+                            <tr style="background: #f8f8f8;">
+                                <td style="text-align: center; padding: 8px; border: 1px solid #e0e0e0; font-weight: 600;">10</td>
+                                <td style="text-align: center; padding: 8px; border: 1px solid #e0e0e0; font-size: 1rem; font-weight: 700; color: #2C5F4A;">$265</td>
+                                <td style="text-align: center; padding: 8px; border: 1px solid #e0e0e0; font-size: 1rem; font-weight: 700; color: #2C5F4A;">$318</td>
+                                <td style="text-align: center; padding: 8px; border: 1px solid #e0e0e0; font-size: 1rem; font-weight: 700; color: #2C5F4A;">$350</td>
+                            </tr>
+                            <tr style="background: #e8f5e9;">
+                                <td style="text-align: center; padding: 8px; border: 1px solid #4A8B6A; font-weight: 600;">11+</td>
+                                <td style="text-align: center; padding: 8px; border: 1px solid #4A8B6A; font-size: 0.9rem;">
+                                    <strong>+$25</strong><br><small>por muestra</small>
+                                </td>
+                                <td style="text-align: center; padding: 8px; border: 1px solid #4A8B6A; font-size: 0.9rem;">
+                                    <strong>+$30</strong><br><small>por muestra</small>
+                                </td>
+                                <td style="text-align: center; padding: 8px; border: 1px solid #4A8B6A; font-size: 0.9rem;">
+                                    <strong>+$35</strong><br><small>por muestra</small>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p style="margin-top: 10px; margin-bottom: 0; font-size: 0.85rem; color: #333; text-align: center; font-weight: 600;">
+                        Descuento por volumen: A más muestras, menor precio unitario
+                    </p>
+                </div>
+                
+                <div style="background: #fff3e0; border: 2px solid #FF9800; border-radius: 10px; padding: 20px; margin-bottom: 25px;">
+                    <h4 style="color: #E65100; margin-top: 0;">Ejemplo práctico:</h4>
+                    <div style="color: #555; line-height: 1.8;">
+                        <p style="margin: 8px 0;"><strong>Situación:</strong> Eres Homebrewer y ya pagaste 2 muestras ($83)</p>
+                        <p style="margin: 8px 0;"><strong>Decides inscribir:</strong> 2 muestras más (ahora tienes 4 en total)</p>
+                        <p style="margin: 8px 0;"><strong>Precio para 4 muestras:</strong> $152 según la tabla</p>
+                        <p style="margin: 8px 0; padding: 10px; background: #C8E6C9; border-radius: 5px;">
+                            <strong>Solo pagas ahora:</strong> $152 - $83 = <span style="color: #2E7D32; font-size: 1.2em;">$69 USD</span>
+                        </p>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="btn btn-primary" onclick="iniciarProceso()">
+                        Comenzar
+                    </button>
+                </div>
+                
+                <div style="margin-top: 30px; padding: 15px; background: #f8f9fa; border-radius: 8px; text-align: center;">
+                    <p style="color: #666; font-size: 0.95rem;">
+                        Necesitas ayuda?<br>
+                        Escríbenos a<br>
+                        <a href="mailto:info@copainternacionaldefermentados.com" style="color: #4A8B6A;">
+                            info@copainternacionaldefermentados.com
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div id="step-email" class="payment-section" style="display: none;">
+            <div class="header">
+                <h1>Copa Internacional de Fermentados 2025</h1>
+                <p>Sistema de Pagos de Inscripciones</p>
+            </div>
+            
+            <div style="background: white; border-radius: 15px; padding: 30px; margin-top: 30px;">
+                <h2 class="section-title">Verificación de Email</h2>
+                <div id="email-alert"></div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="email">Correo Electrónico Registrado</label>
+                    <input type="email" id="email" class="form-input" placeholder="tu@correo.com">
+                    <small style="color: #666;">Ingresa el mismo correo que usaste para inscribir tus muestras</small>
+                </div>
+                
+                <div id="codigo-section" class="hidden">
+                    <div class="form-group">
+                        <label class="form-label">Código de Verificación</label>
+                        <input type="text" id="codigo" class="form-input" maxlength="6" placeholder="000000">
+                        <small style="color: #666;">Ingresa el código de 6 dígitos que recibiste por email</small>
+                    </div>
+                    <button id="btn-verificar" class="btn btn-primary" onclick="verificarCodigo()">
+                        Verificar Código
+                    </button>
+                </div>
+                
+                <button class="btn btn-primary" onclick="enviarCodigo()" id="btn-buscar">
+                    Enviar Código de Verificación
+                </button>
+            </div>
+        </div>
+        
+        <div id="step-selection" class="payment-section hidden">
+            <div class="header">
+                <h1>Copa Internacional de Fermentados 2025</h1>
+                <p>Sistema de Pagos de Inscripciones</p>
+            </div>
+            
+            <div style="background: white; border-radius: 15px; padding: 30px; margin-top: 30px;">
+                <h2 class="section-title">Selecciona las Muestras a Pagar</h2>
+                <div id="selection-alert"></div>
+                
+                <div id="muestras-container" class="muestras-container"></div>
+                
+                <div id="resumen-container" class="hidden">
+                    <div class="resumen-pago">
+                        <div class="resumen-titulo">Resumen de Pago</div>
+                        <div id="resumen-items" class="resumen-items"></div>
+                        <div class="resumen-total">
+                            <span>TOTAL A PAGAR:</span>
+                            <span id="total-amount">$0 USD</span>
+                        </div>
+                    </div>
+                    
+                    <div style="background: #e3f2fd; border-left: 4px solid #2196F3; padding: 15px; margin: 20px 0; border-radius: 8px;">
+                        <h4 style="color: #1565C0; margin: 0 0 10px 0; font-size: 1rem;">💡 Elige tu Método de Pago</h4>
+                        <ul style="margin: 0; padding-left: 20px; color: #555; line-height: 1.6;">
+                            <li><strong>PayPal (Recomendado para el extranjero):</strong> Acepta tarjetas internacionales con respaldo de PayPal. Pago seguro en USD.</li>
+                            <li><strong>Flow (Recomendado para Chile):</strong> Webpay (hasta 3 cuotas precio contado), Transferencia bancaria (Khipu), y Billetera Mach en pesos (CLP).</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="payment-methods-container">
+                        <div id="paypal-button-container">
+                            <div class="paypal-header">
+                                <h3>💳 PayPal</h3>
+                                <div class="payment-subtitle">Tarjetas internacionales • USD</div>
+                            </div>
+                            <div id="paypal-buttons-wrapper"></div>
+                            <div class="paypal-footer">
+                                <img src="https://www.paypalobjects.com/webstatic/en_US/i/buttons/cc-badges-ppmcvdam.png" alt="Tarjetas aceptadas">
+                                <p>Pago seguro procesado por PayPal</p>
+                            </div>
+                        </div>
+
+                        <div id="flow-button-container">
+                            <div class="flow-header">
+                                <h3>🇨🇱 Flow Chile</h3>
+                                <div class="payment-subtitle">Webpay • Transferencia • CLP</div>
+                            </div>
+                            <div id="flow-buttons-wrapper">
+                                <button class="flow-button" onclick="pagarConFlow()" id="flow-button">
+                                    <img src="https://img1.wsimg.com/isteam/ip/f3d32df7-8a2f-48bf-ab0b-c13554610131/boton-flow.jpg/:/rs=w:300" alt="Flow">
+                                </button>
+                            </div>
+                            <div class="flow-footer">
+                                <p>Métodos de pago chilenos</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <button class="btn" style="background: #6c757d; color: white;" onclick="volverInicio()">
+                        Volver
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="step-confirmation" class="payment-section hidden">
+            <div class="header">
+                <h1>Copa Internacional de Fermentados 2025</h1>
+                <p>Sistema de Pagos de Inscripciones</p>
+            </div>
+            
+            <div style="background: white; border-radius: 15px; padding: 30px; margin-top: 30px;">
+                <h2 class="section-title">Pago Completado</h2>
+                <div class="alert alert-success">
+                    <h3>Pago procesado exitosamente</h3>
+                    <p id="confirmation-message"></p>
+                </div>
+                
+                <div id="confirmation-details"></div>
+                
+                <div style="margin-top: 30px; text-align: center;">
+                    <button class="btn btn-primary" onclick="location.reload()">
+                        Realizar Otro Pago
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="progressModal" class="modal">
+        <div class="modal-content">
+            <div class="spinner"></div>
+            <h2 id="progressTitle" style="color:#2C5F4A;margin-bottom:20px;">Procesando...</h2>
+            <p id="progressText" style="font-size:18px;margin-bottom:15px;"></p>
+            <div id="progressSteps" style="text-align:left;background:#e9ecef;padding:20px;border-radius:8px;margin-top:20px;">
+                <p id="step1" style="margin:5px 0;color:#6c757d;"></p>
+                <p id="step2" style="margin:5px 0;color:#6c757d;"></p>
+                <p id="step3" style="margin:5px 0;color:#6c757d;"></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="successModal" class="modal modal-success">
+        <div class="modal-content">
+            <div style="font-size:60px;color:#28a745;margin-bottom:20px;">✅</div>
+            <h2 style="color:#28a745;margin-bottom:20px;">Proceso Exitoso</h2>
+            <p id="successMessage" style="font-size:18px;margin-bottom:20px;"></p>
+            <button onclick="closeSuccessModal()" class="btn btn-primary">Continuar</button>
+        </div>
+    </div>
+
+    <div id="errorModal" class="modal modal-error">
+        <div class="modal-content">
+            <div style="font-size:60px;color:#dc3545;margin-bottom:20px;">❌</div>
+            <h2 style="color:#dc3545;margin-bottom:20px;">Error</h2>
+            <p id="errorMessage" style="font-size:18px;margin-bottom:20px;"></p>
+            <button onclick="closeErrorModal()" style="background:#dc3545;color:white;padding:12px 30px;border:none;border-radius:5px;cursor:pointer;font-size:16px;">Cerrar</button>
+        </div>
+    </div>
+    
+    <script>
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyj7BU8AbBj3R87GATMQ-d0jKia_OU7H9fThgXr9-GLv8A8GygwNQ8eR3CapKjOg5tT/exec';
+        const FLOW_API_KEY = '2EF57E60-419D-4212-8A87-5B7FCL163604';
+        
+        let userEmail = '';
+        let muestrasPendientes = [];
+        let muestrasSeleccionadas = [];
+        let totalPagar = 0;
+        let resumenPorTipo = {};
+
+        // VERIFICAR SI VENIMOS DE FLOW AL CARGAR LA PÁGINA
+        window.addEventListener('load', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token');
+            
+            if (token) {
+                console.log('Detectado retorno de Flow con token:', token);
+                verificarPagoFlowRetorno(token);
+            }
+        });
+
+        async function verificarPagoFlowRetorno(token) {
+            showProgressModal('Verificando tu pago con Flow', [
+                'Consultando estado del pago...',
+                'Actualizando muestras...',
+                'Enviando confirmación...'
+            ]);
+            
+            try {
+                await sleep(2000);
+                
+                updateProgressStep(1, '⚙️ Consultando Flow...', '#007bff');
+                
+                const params = new URLSearchParams();
+                params.append('action', 'verificarPagoFlow');
+                params.append('token', token);
+                
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: params
+                });
+                
+                const result = await JSON.parse(await response.text());
+                
+                console.log('Resultado verificación Flow:', result);
+                
+                if (result.success) {
+                    if (result.status === 'approved') {
+                        updateProgressStep(1, '✅ Pago confirmado', '#28a745');
+                        await sleep(500);
+                        
+                        updateProgressStep(2, '✅ Muestras actualizadas', '#28a745');
+                        await sleep(500);
+                        
+                        updateProgressStep(3, '✅ Confirmación enviada', '#28a745');
+                        await sleep(500);
+                        
+                        closeProgressModal();
+                        
+                        // Limpiar URL
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                        
+                        // Mostrar confirmación
+                        const successMsg = `
+                            <strong>¡Pago Flow Exitoso!</strong><br><br>
+                            ID: ${result.flowOrder || 'N/A'}<br>
+                            Monto: $${result.amount || 'N/A'} CLP<br>
+                            Muestras: ${result.muestrasActualizadas || 0}<br><br>
+                            Recibirás un email de confirmación.
+                        `;
+                        showSuccessModal(successMsg);
+                        
+                    } else if (result.status === 'pending') {
+                        closeProgressModal();
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                        showErrorModal('Tu pago está pendiente. Recibirás un email cuando se confirme.');
+                    } else {
+                        closeProgressModal();
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                        showErrorModal('El pago no fue completado. Por favor intenta nuevamente.');
+                    }
+                } else {
+                    closeProgressModal();
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                    showErrorModal(result.error || 'Error al verificar el pago.');
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                closeProgressModal();
+                showErrorModal('Error de conexión. Contacta a soporte.');
+            }
+        }
+        
+        const TABLA_PRECIOS = {
+            'extranjeros': {
+                1: 58, 2: 110, 3: 157.5, 4: 200, 5: 237.5,
+                6: 270, 7: 297.5, 8: 320, 9: 337.5, 10: 350,
+                mas_de_10: 35
+            },
+            'nacionales': {
+                1: 53, 2: 100, 3: 143, 4: 182, 5: 216,
+                6: 245, 7: 270, 8: 291, 9: 307, 10: 318,
+                mas_de_10: 30
+            },
+            'homebrewers': {
+                1: 44, 2: 83, 3: 119, 4: 152, 5: 180,
+                6: 204, 7: 225, 8: 243, 9: 256, 10: 265,
+                mas_de_10: 25
+            }
+        };
+        
+        function toggleMobileMenu() {
+            const nav = document.getElementById('mainNav');
+            const hamburger = document.querySelector('.hamburger');
+            const overlay = document.querySelector('.nav-overlay');
+            
+            nav.classList.toggle('active');
+            hamburger.classList.toggle('active');
+            overlay.classList.toggle('active');
+            
+            if (nav.classList.contains('active')) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = '';
+            }
+        }
+        
+        function closeMobileMenu() {
+            const nav = document.getElementById('mainNav');
+            const hamburger = document.querySelector('.hamburger');
+            const overlay = document.querySelector('.nav-overlay');
+            
+            nav.classList.remove('active');
+            hamburger.classList.remove('active');
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+            
+            document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('show'));
+            document.querySelectorAll('.nav-item.has-dropdown').forEach(item => item.classList.remove('active'));
+        }
+        
+        function toggleDropdown(e, id) {
+            if (!e.target.closest('a')) {
+                e.stopPropagation();
+            }
+            
+            const dropdown = document.getElementById(id);
+            const navItem = e.currentTarget;
+            const isCurrentlyOpen = dropdown.classList.contains('show');
+            
+            document.querySelectorAll('.dropdown').forEach(d => {
+                if (d.id !== id) {
+                    d.classList.remove('show');
+                }
+            });
+            
+            document.querySelectorAll('.nav-item.has-dropdown').forEach(item => {
+                if (item !== navItem) {
+                    item.classList.remove('active');
+                }
+            });
+            
+            if (isCurrentlyOpen) {
+                dropdown.classList.remove('show');
+                navItem.classList.remove('active');
+            } else {
+                dropdown.classList.add('show');
+                navItem.classList.add('active');
+            }
+        }
+        
+        document.addEventListener('click', (e) => {
+            if (e.target.tagName === 'A' && e.target.closest('.dropdown')) {
+                return;
+            }
+            
+            if (e.target.closest('.nav-item.has-dropdown')) {
+                return;
+            }
+            
+            if (!e.target.closest('.main-nav')) {
+                document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('show'));
+                document.querySelectorAll('.nav-item.has-dropdown').forEach(item => item.classList.remove('active'));
+            }
+        });
+        
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) {
+                closeMobileMenu();
+            }
+        });
+        
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function showProgressModal(title, steps) {
+            document.getElementById('progressTitle').textContent = title;
+            document.getElementById('progressText').textContent = '';
+            resetProgressSteps(steps);
+            document.getElementById('progressModal').style.display = 'flex';
+        }
+
+        function resetProgressSteps(steps) {
+            for (let i = 1; i <= 3; i++) {
+                const stepElement = document.getElementById(`step${i}`);
+                if (stepElement) {
+                    stepElement.innerHTML = `⏳ ${steps[i-1] || 'Paso ' + i + '...'}`;
+                    stepElement.style.color = '#6c757d';
+                }
+            }
+        }
+
+        function updateProgressStep(stepNumber, text, color) {
+            const step = document.getElementById(`step${stepNumber}`);
+            if (step) {
+                step.innerHTML = text;
+                step.style.color = color;
+            }
+        }
+
+        function closeProgressModal() {
+            document.getElementById('progressModal').style.display = 'none';
+        }
+
+        function showSuccessModal(message) {
+            document.getElementById('successMessage').textContent = message;
+            document.getElementById('successModal').style.display = 'flex';
+        }
+
+        function closeSuccessModal() {
+            document.getElementById('successModal').style.display = 'none';
+        }
+
+        function showErrorModal(message) {
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('errorModal').style.display = 'flex';
+        }
+
+        function closeErrorModal() {
+            document.getElementById('errorModal').style.display = 'none';
+        }
+        
+        function ordenarMuestrasPorCategoria(muestras) {
+            const orden = {
+                'cervezas_homebrewers': 1,
+                'cervezas_profesionales': 2,
+                'hidromieles': 3,
+                'sidras': 4,
+                'kombuchas': 5,
+                'vinos': 6
+            };
+            
+            return muestras.sort((a, b) => {
+                const ordenA = orden[a.tipo_completo] || 999;
+                const ordenB = orden[b.tipo_completo] || 999;
+                return ordenA - ordenB;
+            });
+        }
+        
+        function getNombreCategoria(tipo) {
+            const nombres = {
+                'cervezas_homebrewers': 'Cervezas Homebrewers',
+                'cervezas_profesionales': 'Cervezas Profesionales',
+                'hidromieles': 'Hidromieles',
+                'sidras': 'Sidras',
+                'kombuchas': 'Kombuchas',
+                'vinos': 'Vinos'
+            };
+            return nombres[tipo] || tipo;
+        }
+        
+        function getTipoProductor(tipoParticipante) {
+            const tipos = {
+                'homebrewers': 'Homebrewer/Casero',
+                'nacionales': 'Productor Nacional',
+                'extranjeros': 'Productor Internacional'
+            };
+            return tipos[tipoParticipante] || 'Productor Internacional';
+        }
+        
+        function iniciarProceso() {
+            document.getElementById('welcome-screen').style.display = 'none';
+            document.getElementById('step-email').style.display = 'block';
+        }
+        
+        function mostrarAlerta(containerId, type, message) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+        }
+        
+        async function enviarCodigo() {
+            const email = document.getElementById('email').value.trim();
+            const btnBuscar = document.getElementById('btn-buscar');
+            
+            if (!email || !email.includes('@')) {
+                showErrorModal('Por favor ingresa un email válido');
+                return;
+            }
+            
+            btnBuscar.disabled = true;
+            
+            showProgressModal('Enviando Código', [
+                'Validando email...',
+                'Generando código...',
+                'Enviando por correo...'
+            ]);
+            
+            try {
+                updateProgressStep(1, '✅ Email validado', '#28a745');
+                await sleep(500);
+                
+                const params = new URLSearchParams();
+                params.append('action', 'enviarCodigoVerificacion');
+                params.append('email', email);
+                
+                updateProgressStep(2, '⚙️ Generando código...', '#007bff');
+                
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: params
+                });
+                
+                const text = await response.text();
+                const data = JSON.parse(text);
+                
+                if (data.success) {
+                    updateProgressStep(2, '✅ Código generado', '#28a745');
+                    await sleep(500);
+                    
+                    updateProgressStep(3, '📧 Correo enviado', '#28a745');
+                    await sleep(800);
+                    
+                    closeProgressModal();
+                    showSuccessModal('Código enviado a tu email. Revisa tu bandeja de entrada.');
+                    
+                    setTimeout(() => {
+                        closeSuccessModal();
+                        document.getElementById('codigo-section').classList.remove('hidden');
+                        btnBuscar.classList.add('hidden');
+                    }, 2000);
+                } else {
+                    closeProgressModal();
+                    showErrorModal(data.error || 'Error al enviar código');
+                }
+            } catch (error) {
+                closeProgressModal();
+                showErrorModal('Error de conexión. Intenta nuevamente.');
+            } finally {
+                btnBuscar.disabled = false;
+            }
+        }
+        
+        async function verificarCodigo() {
+            const email = document.getElementById('email').value.trim();
+            const codigo = document.getElementById('codigo').value.trim();
+            const btnVerificar = document.getElementById('btn-verificar');
+            
+            if (!codigo || codigo.length !== 6) {
+                showErrorModal('Por favor ingresa el código de 6 dígitos');
+                return;
+            }
+            
+            btnVerificar.disabled = true;
+            
+            showProgressModal('Verificando Código', [
+                'Validando código...',
+                'Verificando identidad...',
+                'Cargando muestras...'
+            ]);
+            
+            try {
+                updateProgressStep(1, '⚙️ Validando código...', '#007bff');
+                
+                const params = new URLSearchParams();
+                params.append('action', 'verificarCodigo');
+                params.append('email', email);
+                params.append('codigo', codigo);
+                
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: params
+                });
+                
+                const text = await response.text();
+                const result = JSON.parse(text);
+                
+                if (result.success) {
+                    updateProgressStep(1, '✅ Código validado', '#28a745');
+                    await sleep(500);
+                    
+                    updateProgressStep(2, '✅ Identidad verificada', '#28a745');
+                    await sleep(500);
+                    
+                    userEmail = email;
+                    
+                    updateProgressStep(3, '⚙️ Cargando muestras...', '#007bff');
+                    await buscarMuestras();
+                    
+                    updateProgressStep(3, '✅ Muestras cargadas', '#28a745');
+                    await sleep(500);
+                    
+                    closeProgressModal();
+                } else {
+                    closeProgressModal();
+                    showErrorModal(result.error || 'Código incorrecto');
+                }
+            } catch (error) {
+                closeProgressModal();
+                showErrorModal('Error al verificar código');
+            } finally {
+                btnVerificar.disabled = false;
+            }
+        }
+        
+        async function buscarMuestras() {
+            try {
+                const params = new URLSearchParams();
+                params.append('action', 'getMuestrasPendientes');
+                params.append('email', userEmail);
+                
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: params
+                });
+                
+                const text = await response.text();
+                const data = JSON.parse(text);
+                
+                if (data.success) {
+                    if (data.muestras && data.muestras.length > 0) {
+                        muestrasPendientes = data.muestras.map(muestra => {
+                            muestra.tipo_participante = muestra.tipo || 'extranjeros';
+                            return muestra;
+                        });
+
+                        window.muestrasPagadasGlobal = data.muestrasPagadas || [];
+
+                        document.getElementById('step-email').style.display = 'none';
+                        document.getElementById('step-selection').classList.remove('hidden');
+                        mostrarMuestras();
+                    } else {
+                        closeProgressModal();
+                        showErrorModal('No tienes muestras pendientes de pago');
+                    }
+                } else {
+                    closeProgressModal();
+                    showErrorModal(data.error || 'Error al buscar muestras');
+                }
+            } catch (error) {
+                closeProgressModal();
+                showErrorModal('Error de conexión. Intenta nuevamente.');
+            }
+        }
+        
+        function mostrarMuestras() {
+            const container = document.getElementById('muestras-container');
+            
+            const muestrasOrdenadas = ordenarMuestrasPorCategoria(muestrasPendientes);
+            
+            const muestrasPorCategoria = {};
+            muestrasOrdenadas.forEach(muestra => {
+                if (!muestrasPorCategoria[muestra.tipo_completo]) {
+                    muestrasPorCategoria[muestra.tipo_completo] = [];
+                }
+                muestrasPorCategoria[muestra.tipo_completo].push(muestra);
+            });
+            
+            let html = '';
+            
+            for (const [categoria, muestras] of Object.entries(muestrasPorCategoria)) {
+                html += `<div class="categoria-header">${getNombreCategoria(categoria)}</div>`;
+                
+                muestras.forEach((muestra, index) => {
+                    const id = `muestra-${muestra.tipo_completo}-${muestra.fila}`;
+                    const nombre = muestra.nombre || 'Sin nombre';
+                    const idProduct = muestra.id || 'N/A';
+                    const tipoParticipante = muestra.tipo_participante || '';
+                    const isLast = index === muestras.length - 1;
+                    
+                    html += `
+                        <div class="muestra-item" ${isLast ? 'style="border-bottom: none;"' : ''}>
+                            <input type="checkbox" 
+                                   id="${id}" 
+                                   class="muestra-checkbox" 
+                                   checked
+                                   onchange="seleccionarMuestra('${id}')">
+                            <div class="muestra-info">
+                                <div class="muestra-nombre">${nombre}</div>
+                                <div class="muestra-id">ID: ${idProduct}</div>
+                            </div>
+                            ${tipoParticipante ? `<span class="muestra-tipo">${getTipoProductor(tipoParticipante)}</span>` : ''}
+                        </div>
+                    `;
+                });
+            }
+            
+            container.innerHTML = html;
+            
+            muestrasPendientes.forEach(muestra => {
+                muestrasSeleccionadas.push({...muestra});
+            });
+            
+            calcularResumenPorTipo();
+            mostrarResumen();
+            document.getElementById('resumen-container').classList.remove('hidden');
+            
+            setTimeout(() => {
+                inicializarPayPal();
+            }, 100);
+        }
+        
+        function seleccionarMuestra(id) {
+            const checkbox = document.getElementById(id);
+            const muestra = muestrasPendientes.find(m => 
+                `muestra-${m.tipo_completo}-${m.fila}` === id
+            );
+            
+            if (!muestra) return;
+            
+            muestra.tipo_participante = muestra.tipo || 'extranjeros';
+            
+            if (checkbox.checked) {
+                muestrasSeleccionadas.push({...muestra});
+            } else {
+                muestrasSeleccionadas = muestrasSeleccionadas.filter(m => 
+                    `muestra-${m.tipo_completo}-${m.fila}` !== id
+                );
+            }
+            
+            if (muestrasSeleccionadas.length > 0) {
+                calcularResumenPorTipo();
+                mostrarResumen();
+                document.getElementById('resumen-container').classList.remove('hidden');
+                setTimeout(() => {
+                    inicializarPayPal();
+                }, 100);
+            } else {
+                document.getElementById('resumen-container').classList.add('hidden');
+            }
+        }
+        
+        function calcularResumenPorTipo() {
+            resumenPorTipo = {};
+            totalPagar = 0;
+            
+            const muestrasPorTipo = {};
+            
+            muestrasSeleccionadas.forEach(muestra => {
+                let tipo = muestra.tipo || 'extranjeros';
+                muestra.tipo_participante = tipo;
+                
+                if (!muestrasPorTipo[tipo]) {
+                    muestrasPorTipo[tipo] = [];
+                }
+                muestrasPorTipo[tipo].push(muestra);
+            });
+            
+            for (const [tipo, muestras] of Object.entries(muestrasPorTipo)) {
+                const cantidadSeleccionadas = muestras.length;
+                
+                const cantidadYaPagadas = (window.muestrasPagadasGlobal || []).filter(m => 
+                    m.tipo === tipo
+                ).length;
+                
+                const totalMuestras = cantidadYaPagadas + cantidadSeleccionadas;
+                
+                let precioTotalConNuevas = 0;
+                if (totalMuestras <= 10) {
+                    precioTotalConNuevas = TABLA_PRECIOS[tipo][totalMuestras];
+                } else {
+                    precioTotalConNuevas = TABLA_PRECIOS[tipo][10] + ((totalMuestras - 10) * TABLA_PRECIOS[tipo].mas_de_10);
+                }
+                
+                let precioYaPagado = 0;
+                if (cantidadYaPagadas > 0) {
+                    if (cantidadYaPagadas <= 10) {
+                        precioYaPagado = TABLA_PRECIOS[tipo][cantidadYaPagadas];
+                    } else {
+                        precioYaPagado = TABLA_PRECIOS[tipo][10] + ((cantidadYaPagadas - 10) * TABLA_PRECIOS[tipo].mas_de_10);
+                    }
+                }
+                
+                const precioGrupo = precioTotalConNuevas - precioYaPagado;
+                
+                const tipoNombre = getTipoProductor(tipo);
+                
+                resumenPorTipo[tipo] = {
+                    nombre: tipoNombre,
+                    cantidad: cantidadSeleccionadas,
+                    total: precioGrupo
+                };
+                
+                totalPagar += precioGrupo;
+            }
+        }
+        
+        function mostrarResumen() {
+            const itemsContainer = document.getElementById('resumen-items');
+            const totalElement = document.getElementById('total-amount');
+            
+            let html = '';
+            
+            const orden = ['homebrewers', 'nacionales', 'extranjeros'];
+            
+            orden.forEach(tipo => {
+                if (resumenPorTipo[tipo]) {
+                    const datos = resumenPorTipo[tipo];
+                    html += `
+                        <div class="resumen-item">
+                            <span class="resumen-item-tipo">
+                                ${datos.nombre} - ${datos.cantidad} muestra${datos.cantidad > 1 ? 's' : ''}
+                            </span>
+                            <span class="resumen-item-precio">${datos.total.toFixed(2)} USD</span>
+                        </div>
+                    `;
+                }
+            });
+            
+            itemsContainer.innerHTML = html;
+            totalElement.textContent = `${totalPagar.toFixed(2)} USD`;
+        }
+        
+        let paypalReintentos = 0;
+        const maxReintentos = 10;
+        
+        function inicializarPayPal() {
+            if (paypalReintentos >= maxReintentos) {
+                showErrorModal('Error al cargar PayPal. Por favor recarga la página o inténtalo más tarde.');
+                return;
+            }
+            
+            if (typeof paypal === 'undefined') {
+                paypalReintentos++;
+                
+                if (paypalReintentos < maxReintentos) {
+                    setTimeout(() => inicializarPayPal(), 1000);
+                }
+                return;
+            }
+            
+            paypalReintentos = 0;
+            
+            const wrapper = document.getElementById('paypal-buttons-wrapper');
+            if (!wrapper) return;
+            
+            wrapper.innerHTML = '';
+            
+            paypal.Buttons({
+                style: {
+                    layout: 'vertical',
+                    color: 'blue',
+                    shape: 'rect',
+                    label: 'pay'
+                },
+                createOrder: function(data, actions) {
+                    const descripcionItems = [];
+                    const orden = ['homebrewers', 'nacionales', 'extranjeros'];
+                    
+                    orden.forEach(tipo => {
+                        if (resumenPorTipo[tipo]) {
+                            const datos = resumenPorTipo[tipo];
+                            descripcionItems.push(`${datos.nombre}: ${datos.cantidad} muestra(s)`);
+                        }
+                    });
+                    
+                    return actions.order.create({
+                        purchase_units: [{
+                            description: `Copa Internacional de Fermentados 2025 - ${descripcionItems.join(', ')}`,
+                            amount: {
+                                currency_code: "USD",
+                                value: totalPagar.toFixed(2)
+                            }
+                        }]
+                    });
+                },
+                onApprove: function(data, actions) {
+                    showProgressModal('Procesando Pago', [
+                        'Capturando pago...',
+                        'Actualizando registros...',
+                        'Enviando confirmación...'
+                    ]);
+                    
+                    return actions.order.capture().then(async function(details) {
+                        updateProgressStep(1, '✅ Pago capturado', '#28a745');
+                        await sleep(500);
+                        
+                        await procesarPago(details);
+                    });
+                },
+                onError: function(err) {
+                    showErrorModal('Error al procesar el pago. Por favor intenta nuevamente.');
+                },
+                onCancel: function(data) {
+                    mostrarAlerta('selection-alert', 'warning', 'Pago cancelado. Puedes intentar nuevamente cuando desees.');
+                }
+            }).render('#paypal-buttons-wrapper').catch(function(err) {
+                showErrorModal('Error al cargar PayPal. Recarga la página e intenta nuevamente.');
+            });
+        }
+
+        async function pagarConFlow() {
+            const flowButton = document.getElementById('flow-button');
+            flowButton.disabled = true;
+
+            showProgressModal('Iniciando pago con Flow', [
+                'Creando orden de pago...',
+                'Redirigiendo a Flow...',
+                'Completando transacción...'
+            ]);
+
+            try {
+                updateProgressStep(1, '⚙️ Creando orden de pago...', '#007bff');
+
+                const descripcionItems = [];
+                const orden = ['homebrewers', 'nacionales', 'extranjeros'];
+                
+                orden.forEach(tipo => {
+                    if (resumenPorTipo[tipo]) {
+                        const datos = resumenPorTipo[tipo];
+                        descripcionItems.push(`${datos.nombre}: ${datos.cantidad} muestra(s)`);
+                    }
+                });
+
+                const params = new URLSearchParams();
+                params.append('action', 'crearPagoFlow');
+                params.append('email', userEmail);
+                params.append('amount', Math.round(totalPagar));
+                params.append('description', `CIF 2025 - ${descripcionItems.join(', ')}`);
+                params.append('apiKey', FLOW_API_KEY);
+                params.append('muestras', JSON.stringify(muestrasSeleccionadas));
+                params.append('resumenPorTipo', JSON.stringify(resumenPorTipo));
+
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: params
+                });
+
+                const result = await JSON.parse(await response.text());
+
+                if (result.success && result.flowUrl) {
+                    updateProgressStep(1, '✅ Orden creada', '#28a745');
+                    await sleep(500);
+                    
+                    updateProgressStep(2, '🔄 Redirigiendo a Flow...', '#007bff');
+                    await sleep(800);
+
+                    closeProgressModal();
+                    window.location.href = result.flowUrl;
+                } else {
+                    closeProgressModal();
+                    showErrorModal(result.error || 'Error al crear el pago con Flow');
+                }
+            } catch (error) {
+                closeProgressModal();
+                showErrorModal('Error de conexión con Flow. Intenta nuevamente.');
+            } finally {
+                flowButton.disabled = false;
+            }
+        }
+        
+        async function procesarPago(paymentDetails) {
+            try {
+                updateProgressStep(2, '⚙️ Actualizando registros...', '#007bff');
+                
+                const muestrasParaActualizar = muestrasSeleccionadas.map(m => {
+                    const grupoInfo = resumenPorTipo[m.tipo_participante];
+                    return {
+                        ...m,
+                        precioGrupo: grupoInfo.total,
+                        cantidadGrupo: grupoInfo.cantidad,
+                        montoPagadoUSD: grupoInfo.total,
+                        precioIndividualUSD: parseFloat((grupoInfo.total / grupoInfo.cantidad).toFixed(2))
+                    };
+                });
+                
+                const params = new URLSearchParams();
+                params.append('action', 'actualizarPago');
+                params.append('email', userEmail);
+                params.append('muestras', JSON.stringify(muestrasParaActualizar));
+                params.append('transactionId', paymentDetails.id);
+                params.append('payerEmail', paymentDetails.payer.email_address);
+                params.append('payerName', paymentDetails.payer.name.given_name + ' ' + paymentDetails.payer.name.surname);
+                params.append('amount', totalPagar.toFixed(2));
+                params.append('resumenPorTipo', JSON.stringify(resumenPorTipo));
+                
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: params
+                });
+                
+                const result = await JSON.parse(await response.text());
+                
+                if (result.success) {
+                    updateProgressStep(2, '✅ Registros actualizados', '#28a745');
+                    await sleep(500);
+                    
+                    updateProgressStep(3, '📧 Enviando confirmación...', '#007bff');
+                    await enviarEmailConfirmacion(paymentDetails);
+                    
+                    updateProgressStep(3, '✅ Confirmación enviada', '#28a745');
+                    await sleep(800);
+                    
+                    closeProgressModal();
+                    mostrarConfirmacion(paymentDetails);
+                } else {
+                    closeProgressModal();
+                    mostrarAlerta('selection-alert', 'warning', 
+                        'El pago fue procesado pero hubo un error al actualizar los registros. ' +
+                        'Contacta con soporte con el ID de transacción: ' + paymentDetails.id);
+                }
+            } catch (error) {
+                closeProgressModal();
+                mostrarAlerta('selection-alert', 'warning', 
+                    'El pago fue procesado pero hubo un error de conexión. ' +
+                    'Guarda el ID de transacción: ' + paymentDetails.id);
+            }
+        }
+        
+        async function enviarEmailConfirmacion(details) {
+            try {
+                const params = new URLSearchParams();
+                params.append('action', 'enviarConfirmacionPago');
+                params.append('email', userEmail);
+                params.append('transactionId', details.id);
+                params.append('muestras', JSON.stringify(muestrasSeleccionadas));
+                params.append('total', totalPagar.toFixed(2));
+                
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: params
+                });
+            } catch (error) {
+                console.error('Error enviando confirmación:', error);
+            }
+        }
+        
+        function mostrarConfirmacion(details) {
+            document.getElementById('step-selection').classList.add('hidden');
+            document.getElementById('step-confirmation').classList.remove('hidden');
+            
+            const message = document.getElementById('confirmation-message');
+            const detailsContainer = document.getElementById('confirmation-details');
+            
+            message.innerHTML = `
+                Se ha procesado el pago de <strong>${muestrasSeleccionadas.length} muestra(s)</strong> 
+                por un total de <strong>$${totalPagar.toFixed(2)} USD</strong>.
+            `;
+            
+            let detailsHtml = `
+                <div class="alert alert-info">
+                    <h4>Detalles del Pago:</h4>
+                    <p><strong>ID de Transacción:</strong> ${details.id}</p>
+                    <p><strong>Fecha:</strong> ${new Date().toLocaleString('es-CL')}</p>
+                    <p><strong>Estado:</strong> ${details.status}</p>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <h4>Resumen del Pago:</h4>
+            `;
+            
+            Object.values(resumenPorTipo).forEach(tipo => {
+                detailsHtml += `
+                    <div style="padding: 8px 10px; background: #f8f9fa; margin-bottom: 8px; border-radius: 5px; display: flex; justify-content: space-between;">
+                        <span><strong>${tipo.nombre}</strong> - ${tipo.cantidad} muestra${tipo.cantidad > 1 ? 's' : ''}</span>
+                        <strong>${tipo.total.toFixed(2)} USD</strong>
+                    </div>
+                `;
+            });
+            
+            detailsHtml += `
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <h4>Muestras Pagadas:</h4>
+            `;
+            
+            muestrasSeleccionadas.forEach(muestra => {
+                detailsHtml += `
+                    <div style="padding: 8px 10px; background: #e8f5e9; margin-bottom: 8px; border-radius: 5px;">
+                        <strong>${muestra.nombre || 'Sin nombre'}</strong> - ${muestra.categoria} (ID: ${muestra.id || 'N/A'})
+                    </div>
+                `;
+            });
+            
+            detailsHtml += '</div>';
+            detailsContainer.innerHTML = detailsHtml;
+        }
+        
+        function volverInicio() {
+            location.reload();
+        }
+    </script>
+</body>
+</html>
